@@ -1,7 +1,12 @@
 "use server";
 
 import OpenAI from "openai";
-import { getGenerateUserMessage } from "./prompts";
+import { getGenerateUserMessage, getSaveDestinationUserMessage } from "./prompts";
+import { db } from "./db";
+import { trips } from "./schema";
+import { nanoid } from "nanoid";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 const openai = new OpenAI();
 
@@ -69,10 +74,96 @@ async function fetchImage(query: string) {
     const result = await fetch(url, {
         headers: {
             Authorization: process.env.PEXELS_API_KEY!!,
-        }
+        },
     })
+
+    // const json = await result.json() as {
+    //     photos: {
+    //         src: {
+    //             large: string;
+    //         }
+    //     }[]
+    // };
 
     const json = await result.json();
 
     return json.photos[0].src.large as string;
+}
+
+type OpenAIResponse = {
+    trip_description: string,
+    flight_price_min: number,
+    flight_price_max: number,
+    flight_time: string,
+    hotel_price: {
+        "3": number,
+        "4": number,
+        "5": number
+    },
+    tip: string,
+    itinerary: {
+        day: number,
+        title: string,
+        description: string,
+        activities: string[]
+    }[]
+};
+
+export const saveDestination = async (
+    city: string, 
+    country: string, 
+    descriptionShort: string, 
+    imageUrl: string,
+    budget: number,
+    from: string,
+    days: number) => {
+    const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo-1106",
+        messages: [
+            { role: "system", content: "You are a travel assistant" },
+            { 
+                role: "user", 
+                content: getSaveDestinationUserMessage({
+                    city,
+                    country,
+                    budget,
+                    days,
+                    from,
+                    details: descriptionShort,
+                }) 
+            },
+        ],
+        response_format: { type: "json_object" }
+    })
+
+    const content = response.choices[0].message.content;
+
+    if (!content) {
+        return null;
+    }
+
+    const tripDetails = JSON.parse(content) as OpenAIResponse;
+
+    console.log(tripDetails);
+    
+    const id = nanoid(14);
+    await db.insert(trips).values({
+        id,
+        city,
+        country,
+        descriptionShort,
+        imageUrl,
+        descriptionLong : tripDetails.trip_description,
+        flightMin: tripDetails.flight_price_min,
+        flightMax: tripDetails.flight_price_max,
+        flightTime,: tripDetails.flight_time,
+        hotel3: tripDetails.hotel_price["3"],
+        hotel4: tripDetails.hotel_price["4"],
+        hotel5: tripDetails.hotel_price["5"],
+        tip: tripDetails.tip,
+        itinerary: tripDetails.itinerary,
+    })
+
+    revalidatePath("/dashboard");
+    redirect(`/trips/${id}`);
 }
