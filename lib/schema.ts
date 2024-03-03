@@ -18,3 +18,5 @@ export const trips = pgTable("trips", {
     createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+
+export type Trip = typeof trips.$inferSelect;

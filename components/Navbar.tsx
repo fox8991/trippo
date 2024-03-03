@@ -1,8 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { PlaneLanding } from "lucide-react";
 import Container from "./Container";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
+    const pathName = usePathname();
+
+    if (pathName === "/") return null;
+
     return (
         <div className="bg-blue-600 text-white shadow-lg">
             <Container>

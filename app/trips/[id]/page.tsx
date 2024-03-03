@@ -1,20 +1,44 @@
 import { db } from "@/lib/db";
 import { trips } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import TripDetail from "./TripeDetail";
+import ItineraryList from "./ItineraryList";
+import type { Itinerary } from "./ItineraryList";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }:
+    { params: { id: string } }
+): Promise<Metadata> {
+    const trip = await db.select(
+        {
+            city: trips.city
+        }
+    ).from(trips).where(eq(trips.id, params.id));
+    const cityName = trip[0].city;
+
+    return {
+        title: `Your trip to ${cityName}`,
+    }
+}
 
 type Props = {
     params: { id: string }
 }
 
-
-export default async function TripDetails(props: Props) {
+export default async function TripDetailPage(props: Props) {
     const trip = await db.select().from(trips).where(eq(trips.id, props.params.id));
 
-    if (!trip[0]) return (
-        <div>No trip found</div>
-    )
+    if (!trip[0]) return notFound();
 
     return (
-        <div>You are going to: {trip[0].city}</div>
+        <div className=" flex px-32 my-16 max-h-[150vh]">
+            <aside className=" w-1/2 border-r-2 px-8 pb-24 overflow-y-auto">
+                <TripDetail {...trip[0]} />
+            </aside>
+            <main>
+                <ItineraryList itinerary={trip[0].itinerary as Itinerary[]} />
+            </main>
+        </div>
     )
 }

@@ -7,6 +7,7 @@ import { trips } from "./schema";
 import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
 
 const openai = new OpenAI();
 
@@ -156,7 +157,7 @@ export const saveDestination = async (
         descriptionLong : tripDetails.trip_description,
         flightMin: tripDetails.flight_price_min,
         flightMax: tripDetails.flight_price_max,
-        flightTime,: tripDetails.flight_time,
+        flightTime: tripDetails.flight_time,
         hotel3: tripDetails.hotel_price["3"],
         hotel4: tripDetails.hotel_price["4"],
         hotel5: tripDetails.hotel_price["5"],
@@ -166,4 +167,15 @@ export const saveDestination = async (
 
     revalidatePath("/dashboard");
     redirect(`/trips/${id}`);
+}
+
+
+export const deleteDestination = async (
+    id: string, 
+) => {
+
+    await db.delete(trips).where(eq(trips.id, id));
+
+    revalidatePath("/dashboard");
+    redirect(`/dashboard`);
 }
