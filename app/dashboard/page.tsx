@@ -68,6 +68,7 @@ function NoTrips() {
 
 // React server component (RSC)
 export default async function Dashboard() {
+    console.log("getting dashboard")
     const allTrips = await db.select().from(trips);
 
     if (allTrips.length < 1) {
