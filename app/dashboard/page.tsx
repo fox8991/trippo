@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import Container from "@/components/Container";
 import { db } from "@/lib/db";
 import { trips } from "@/lib/schema";
