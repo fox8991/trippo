@@ -1,5 +1,20 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## About Trippo
+
+Trippo is a travel planning application designed to help users discover unique travel destinations and generate personalized itineraries with the power of AI. Users can input their travel preferences, and Trippo will provide destination suggestions and detailed trip plans.
+
+## Tech Stack
+
+Trippo is built with a modern technology stack:
+
+*   **Frontend:** [Next.js](https://nextjs.org/) (a React framework)
+*   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+*   **Backend:** Next.js API Routes
+*   **Database:** [PostgreSQL](https://www.postgresql.org/) managed with [Drizzle ORM](https://orm.drizzle.team/) and hosted on [NeonDB](https://neon.tech/)
+*   **AI/LLM:** [OpenAI GPT](https://openai.com/) (via the `openai` npm package)
+*   **Language:** [TypeScript](https://www.typescriptlang.org/)
+
 ## Getting Started
 
 First, run the development server:
